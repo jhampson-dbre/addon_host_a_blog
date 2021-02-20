@@ -22,3 +22,23 @@ def categories_list(context):
         'request': context['request'],
         'categories': categories
     }
+
+
+@register.inclusion_tag("blog/components/post_categories_list.html", takes_context=True)
+def post_categories_list(context):
+    page = context["page"]
+    post_categories = page.categories.all()
+    return {
+        "request": context["request"],
+        "post_categories": post_categories,
+    }
+
+
+@register.inclusion_tag("blog/components/post_tags_list.html", takes_context=True)
+def post_tags_list(context):
+    page = context["page"]
+    post_tags = page.tags.all()
+    return {
+        "request": context["request"],
+        "post_tags": post_tags,
+    }
