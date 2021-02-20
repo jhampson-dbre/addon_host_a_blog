@@ -3,7 +3,7 @@
 {% load wagtailcore_tags wagtailimages_tags %}
 
 {% block content %}
-    {% for post in page.get_children.specific %}
+    {% for post in posts %}
     <div class="card mb-4">
         {% if post.header_image %}
             {% image post.header_image original as header_image %}

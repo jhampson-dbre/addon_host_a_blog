@@ -16,13 +16,38 @@ from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.snippets.edit_handlers import SnippetChooserPanel
 from wagtail.snippets.models import register_snippet
 from wagtail.core.fields import StreamField
+from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from .blocks import BodyBlock
 
 
-class BlogPage(Page):
+class BlogPage(RoutablePageMixin, Page):
     description = models.CharField(max_length=255, blank=True,)
     content_panels = Page.content_panels + \
         [FieldPanel("description", classname="full")]
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        context['blog_page'] = self
+        context['posts'] = self.posts
+        return context
+
+    def get_posts(self):
+        return PostPage.objects.descendant_of(self).live()
+
+    @route(r'^tag/(?P<tag>[-\w]+)/$')
+    def post_by_tag(self, request, tag, *args, **kwargs):
+        self.posts = self.get_posts().filter(tags__slug=tag)
+        return self.render(request)
+
+    @route(r'^category/(?P<category>[-\w]+)/$')
+    def post_by_category(self, request, category, *args, **kwargs):
+        self.posts = self.get_posts().filter(categories__blog_category__slug=category)
+        return self.render(request)
+
+    @route(r'^$')
+    def post_list(self, request, *args, **kwargs):
+        self.posts = self.get_posts()
+        return self.render(request)
 
 
 class PostPage(Page):
@@ -44,6 +69,11 @@ class PostPage(Page):
         FieldPanel("tags"),
         StreamFieldPanel("body"),
     ]
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        context['blog_page'] = self.get_parent().specific
+        return context
 
 
 class PostPageBlogCategory(models.Model):
