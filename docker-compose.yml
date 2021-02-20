@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./compose/local/web/Dockerfile
+    image: wagtail_bootstrap_blog_web
+    command: /start.sh
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env/.dev-sample
+    depends_on:
+      - db
+  db:
+    image: mariadb:10.5.8-focal
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=wagtail_bootstrap_blog
+      - MYSQL_USER=wagtail_bootstrap_blog
+      - MYSQL_PASSWORD=wagtail_bootstrap_blog
+      - MYSQL_ROOT_PASSWORD=wagtail_bootstrap_blog
+volumes:
+  mariadb_data:
