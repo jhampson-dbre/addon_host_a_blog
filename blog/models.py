@@ -15,6 +15,8 @@ from wagtail.core.models import Page
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.snippets.edit_handlers import SnippetChooserPanel
 from wagtail.snippets.models import register_snippet
+from wagtail.core.fields import StreamField
+from .blocks import BodyBlock
 
 
 class BlogPage(Page):
@@ -31,11 +33,16 @@ class PostPage(Page):
         on_delete=models.SET_NULL,
         related_name="+",
     )
+
+    body = StreamField(BodyBlock(), blank=True)
+
     tags = ClusterTaggableManager(through="blog.PostPageTag", blank=True)
+
     content_panels = Page.content_panels + [
         ImageChooserPanel("header_image"),
         InlinePanel("categories", label="category"),
         FieldPanel("tags"),
+        StreamFieldPanel("body"),
     ]
 
 
