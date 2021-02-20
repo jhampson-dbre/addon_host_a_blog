@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'home',
     'search',
     'blog',
+    'django_extensions',
 
     'wagtail.contrib.forms',
     'wagtail.contrib.redirects',
