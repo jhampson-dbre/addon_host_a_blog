@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from modelcluster.fields import ParentalKey
 from modelcluster.tags import ClusterTaggableManager
 from taggit.models import Tag as TaggitTag
@@ -28,7 +29,17 @@ class BlogPage(RoutablePageMixin, Page):
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
         context['blog_page'] = self
-        context['posts'] = self.posts
+
+        paginator = Paginator(self.posts, 2)
+        page = request.GET.get("page")
+        try:
+            posts = paginator.page(page)
+        except PageNotAnInteger:
+            posts = paginator.page(1)
+        except EmptyPage:
+            posts = paginator.object_list.none()
+
+        context['posts'] = posts
         return context
 
     def get_posts(self):
