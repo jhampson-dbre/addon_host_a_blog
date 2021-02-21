@@ -1,5 +1,7 @@
+import datetime
 from django.db import models
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.http import Http404
 from modelcluster.fields import ParentalKey
 from modelcluster.tags import ClusterTaggableManager
 from taggit.models import Tag as TaggitTag
@@ -43,7 +45,26 @@ class BlogPage(RoutablePageMixin, Page):
         return context
 
     def get_posts(self):
-        return PostPage.objects.descendant_of(self).live()
+        return PostPage.objects.descendant_of(self).live().order_by("-post_date")
+
+    @route(r"^(\d{4})/$")
+    @route(r"^(\d{4})/(\d{2})/$")
+    @route(r"^(\d{4})/(\d{2})/(\d{2})/$")
+    def post_by_date(self, request, year, month=None, day=None, *args, **kwargs):
+        self.posts = self.get_posts().filter(post_date__year=year)
+        if month:
+            self.posts = self.posts.filter(post_date__month=month)
+        if day:
+            self.posts = self.posts.filter(post_date__day=day)
+        return self.render(request)
+
+    @route(r"^(\d{4})/(\d{2})/(\d{2})/(.+)/$")
+    def post_by_date_slug(self, request, year, month, day, slug, *args, **kwargs):
+        post_page = self.get_posts().filter(slug=slug).first()
+        if not post_page:
+            raise Http404
+        # here we render another page, so we call the serve method of the page instance
+        return post_page.serve(request)
 
     @route(r'^tag/(?P<tag>[-\w]+)/$')
     def post_by_tag(self, request, tag, *args, **kwargs):
@@ -81,10 +102,30 @@ class PostPage(Page):
         StreamFieldPanel("body"),
     ]
 
+    post_date = models.DateTimeField(
+        verbose_name="Post date", default=datetime.datetime.today
+    )
+
+    settings_panels = Page.settings_panels + [
+        FieldPanel("post_date"),
+    ]
+
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
-        context['blog_page'] = self.get_parent().specific
+        context['blog_page'] = self.blog_page
         return context
+
+    @cached_property
+    def blog_page(self):
+        return self.get_parent().specific
+
+    @cached_property
+    def canonical_url(self):
+        # we import here to avoid circular import
+        from blog.templatetags.blogapp_tags import post_page_date_slug_url
+
+        blog_page = self.get_parent().specific
+        return post_page_date_slug_url(self, blog_page)
 
 
 class PostPageBlogCategory(models.Model):
