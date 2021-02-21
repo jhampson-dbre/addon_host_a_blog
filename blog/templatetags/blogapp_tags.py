@@ -10,6 +10,7 @@ def tags_list(context):
     tags = Tag.objects.all()
     return {
         'request': context['request'],
+        'blog_page': context['blog_page'],
         'tags': tags
     }
 
@@ -20,6 +21,7 @@ def categories_list(context):
     categories = Category.objects.all()
     return {
         'request': context['request'],
+        'blog_page': context['blog_page'],
         'categories': categories
     }
 
