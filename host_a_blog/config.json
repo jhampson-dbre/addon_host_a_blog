@@ -1,0 +1,15 @@
+{
+    "name": "Host-a-Blog",
+    "version": "0.0.0",
+    "slug": "host_a_blog",
+    "description": "Host your own blog from Home Assistant",
+    "arch": [
+        "armhf",
+        "armv7",
+        "aarch64",
+        "amd64",
+        "i386"
+    ],
+    "options": {},
+    "schema": {}
+}
