@@ -1,6 +1,7 @@
 import datetime
 from django.db import models
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.utils.functional import cached_property
 from django.http import Http404
 from modelcluster.fields import ParentalKey
 from modelcluster.tags import ClusterTaggableManager

@@ -1,16 +1,19 @@
-FROM python:3.8-slim-buster
+ARG BUILD_FROM
+
+FROM $BUILD_FROM
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 # Install system packages required by Wagtail and Django.
-RUN apt-get update --yes --quiet && apt-get install --yes --quiet --no-install-recommends \
-    build-essential \
-    libpq-dev \
-    libmariadbclient-dev \
-    libjpeg62-turbo-dev \
-    zlib1g-dev \
-    libwebp-dev \
-    mariadb-client \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache --virtual .build-deps \
+    gcc \
+    linux-headers \
+    mariadb-dev \
+    mariadb-client\
+    musl-dev \
+    libpq \
+    zlib \
+    zlib-dev \
+    jpeg-dev
 # Requirements are installed here to ensure they will be cached.
 COPY ./requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
