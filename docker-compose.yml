@@ -10,7 +10,7 @@ services:
     image: wagtail_bootstrap_blog_web
     command: /start.sh
     volumes:
-      - .:/app
+      - ./host_a_blog:/app
     ports:
       - 8000:8000
     stdin_open: true

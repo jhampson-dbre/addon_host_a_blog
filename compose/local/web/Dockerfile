@@ -15,7 +15,7 @@ RUN apk add --no-cache --virtual .build-deps \
     zlib-dev \
     jpeg-dev
 # Requirements are installed here to ensure they will be cached.
-COPY ./requirements.txt /requirements.txt
+COPY ./host_a_blog/requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
 COPY ./compose/local/web/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
